@@ -94,7 +94,7 @@ const displayMovements = function (movements, sort = false) {
         <div class="movements__type movements__type--${type}">${
       i + 1
     } ${type}</div>
-        <div class="movements__value">${mov}€</div>
+        <div class="movements__value">${mov.toFixed(2)}€</div>
       </div>
     `;
 
@@ -104,19 +104,19 @@ const displayMovements = function (movements, sort = false) {
 
 const calcDisplayBalance = function (acc) {
   acc.balance = acc.movements.reduce((acc, mov) => acc + mov, 0);
-  labelBalance.textContent = `${acc.balance}€`;
+  labelBalance.textContent = `${acc.balance.toFixed(2)}€`;
 };
 
 const calcDisplaySummary = function (acc) {
   const incomes = acc.movements
     .filter(mov => mov > 0)
     .reduce((acc, mov) => acc + mov, 0);
-  labelSumIn.textContent = `${incomes}€`;
+  labelSumIn.textContent = `${incomes.toFixed(2)}€`;
 
   const out = acc.movements
     .filter(mov => mov < 0)
     .reduce((acc, mov) => acc + mov, 0);
-  labelSumOut.textContent = `${Math.abs(out)}€`;
+  labelSumOut.textContent = `${Math.abs(out).toFixed(2)}€`;
 
   const interest = acc.movements
     .filter(mov => mov > 0)
@@ -126,7 +126,7 @@ const calcDisplaySummary = function (acc) {
       return int >= 1;
     })
     .reduce((acc, int) => acc + int, 0);
-  labelSumInterest.textContent = `${interest}€`;
+  labelSumInterest.textContent = `${interest.toFixed(2)}€`;
 };
 
 const createUsernames = function (accs) {
@@ -164,7 +164,7 @@ btnLogin.addEventListener('click', function (e) {
   );
   console.log(currentAccount);
 
-  if (currentAccount?.pin === Number(inputLoginPin.value)) {
+  if (currentAccount?.pin === +inputLoginPin.value) {
     // Display UI and message
     labelWelcome.textContent = `Welcome back, ${
       currentAccount.owner.split(' ')[0]
@@ -182,7 +182,7 @@ btnLogin.addEventListener('click', function (e) {
 
 btnTransfer.addEventListener('click', function (e) {
   e.preventDefault();
-  const amount = Number(inputTransferAmount.value);
+  const amount = +inputTransferAmount.value;
   const receiverAcc = accounts.find(
     acc => acc.username === inputTransferTo.value
   );
@@ -206,7 +206,7 @@ btnTransfer.addEventListener('click', function (e) {
 btnLoan.addEventListener('click', function (e) {
   e.preventDefault();
 
-  const amount = Number(inputLoanAmount.value);
+  const amount = Math.floor(inputLoanAmount.value);
 
   if (amount > 0 && currentAccount.movements.some(mov => mov >= amount * 0.1)) {
     // Add movement
@@ -223,7 +223,7 @@ btnClose.addEventListener('click', function (e) {
 
   if (
     inputCloseUsername.value === currentAccount.username &&
-    Number(inputClosePin.value) === currentAccount.pin
+    +inputClosePin.value === currentAccount.pin
   ) {
     const index = accounts.findIndex(
       acc => acc.username === currentAccount.username
@@ -251,3 +251,97 @@ btnSort.addEventListener('click', function (e) {
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 // LECTURES
+
+/*
+// 01. CONVERTING AND CHECKING NUMBERS
+// In JS, all numbers are represented internally as floating point numbers (always as decimals)
+console.log(23 === 23.0); // This is true
+
+// convert string to number:
+console.log(Number('23')); //or
+console.log(+'23'); // when JS sees a '+', it will do type cohertion
+
+// Parsing: We can parse a number for a string
+console.log(Number.parseInt('30px')); // JS will try to figure out the number in the string, even if there are other words
+console.log(Number.parseInt('px30')); // --> NaN!  The string has to start with a number
+
+// The parseInt accepts a second parameter, the Redix, that is the Base of the numerical system we are using
+console.log(Number.parseInt('30px', 10)); // Same result
+console.log(Number.parseInt('30px', 2)); // Binary
+
+// PARSEFLOAT:
+console.log(Number.parseFloat('2.5rem')); // It read the decimal numbers, not only the integers!
+
+// isNaN : To check if any value is NaN (boolean)
+console.log(Number.isNaN(20)); // FALSE (it's a number)
+console.log(Number.isNaN('20')); // FALSE (it's a string, it's a regular value)
+console.log(Number.isNaN(+'20x')); // TRUE, it's not a number
+console.log(Number.isNaN(23 / 0)); // FALSE, it gives 'infinity'
+
+// Better method:  isFinite ---> it checks if it is a number
+console.log(Number.isFinite(20)); // TRUE, it's a number
+console.log(Number.isFinite('20')); // FALSE It's a string
+console.log(Number.isFinite(+'20x')); // FALSE
+console.log(Number.isFinite(23 / 0)); // FALSE, it's infinity
+
+// If to check integer:
+console.log(Number.isInteger(23));
+*/
+
+/*
+// 02. MATH AND ROUNDING
+
+// SQUARE ROOT: Math.sqrt
+console.log(Math.sqrt(25));
+console.log(25 ** (1 / 2));
+console.log(8 ** (1 / 3)); // How to calculate the CUBIC ROOT
+
+// MAX VALUE (Math.max())  -- it does type cohertion but not parsing:
+console.log(Math.max(5, 19, 2304, 531, 45425325));
+console.log(Math.max(5, 19, 2304, '531', 45425325)); // The same
+console.log(Math.max(5, 19, 2304, '531x', 45425325)); // Error, NaN
+
+// MIN VALUE
+console.log(Math.min(5, 19, 2304, '531', 45425325));
+
+// Constants:
+// Pi greco:
+console.log(Math.PI);
+
+// Random:
+console.log(Math.trunc(Math.random() * 6) + 1); // Lancio  dado
+
+// Function to create random integers between two values:
+const randomInt = (min, max) =>
+  Math.floor(Math.random() * (max - min) + 1) + min;
+console.log(randomInt(30, 100));
+
+// ROUNDING
+// Rounding Integers:
+console.log(Math.trunc(28.1232)); // Arrotonda togliendo tutti i decimali
+console.log(Math.round(25.6335)); // Arrotonda al numero più vicino
+console.log(Math.floor(25.6335)); // Arrotonda alnumero più basso // Con negative numbers it work gives a more negative integer
+console.log(Math.ceil(25.6335)); // Arrotonda al numero più alto
+
+// Rounding decimals --> we have to insert the decimal number in () and call a method on it
+console.log((2.7).toFixed(0)); // 3, it's a STRING
+console.log((2.7).toFixed(3)); // 2.700, it's a STRING with 3 decimals
+console.log((2.345).toFixed(2)); // 2.35, it's a STRING with 2 decimals
+console.log(+(2.345).toFixed(2)); // 2.35, it's a NUMBER (converted) with 2 decimals
+*/
+/*
+// 03. THE REMAINDER OPERATOR (%) - it returns the remainder (RESTO) of a division
+console.log(5 % 2); // it is 1
+console.log(20 % 3); // it is 2
+
+// Check if number is even or odd (pari o dispari):
+const isEven = n => n % 2 === 0;
+console.log(isEven(8)); // TRUE
+console.log(isEven(27)); // FALSE
+
+labelBalance.addEventListener('click', function () {
+  [...document.querySelectorAll('.movements__row')].forEach(function (row, i) {
+    if (i % 2 === 0) row.style.backgroundColor = 'orangered';
+  });
+});
+*/
