@@ -81,19 +81,30 @@ const inputClosePin = document.querySelector('.form__input--pin');
 /////////////////////////////////////////////////
 // Functions
 
-const displayMovements = function (movements, sort = false) {
+const displayMovements = function (acc, sort = false) {
   containerMovements.innerHTML = '';
 
-  const movs = sort ? movements.slice().sort((a, b) => a - b) : movements;
+  const movs = sort
+    ? acc.movements.slice().sort((a, b) => a - b)
+    : acc.movements;
 
   movs.forEach(function (mov, i) {
     const type = mov > 0 ? 'deposit' : 'withdrawal';
+
+    const date = new Date(acc.movementsDates[i]);
+    const now = new Date();
+    const day = `${date.getDate()}`.padStart(2, 0);
+    const month = `${date.getMonth() + 1}`.padStart(2, 0);
+    const year = date.getFullYear();
+
+    const displayDate = `${day}/${month}/${year}`;
 
     const html = `
       <div class="movements__row">
         <div class="movements__type movements__type--${type}">${
       i + 1
     } ${type}</div>
+        <div class="movements__date">${displayDate}</div>
         <div class="movements__value">${mov.toFixed(2)}€</div>
       </div>
     `;
@@ -142,7 +153,7 @@ createUsernames(accounts);
 
 const updateUI = function (acc) {
   // Display movements
-  displayMovements(acc.movements);
+  displayMovements(acc);
 
   // Display balance
   calcDisplayBalance(acc);
@@ -154,6 +165,20 @@ const updateUI = function (acc) {
 ///////////////////////////////////////
 // Event handlers
 let currentAccount;
+
+// FAKE ALWAYS LOGGED IN
+currentAccount = account1;
+updateUI(currentAccount);
+containerApp.style.opacity = 100;
+
+const now = new Date();
+const day = `${now.getDate()}`.padStart(2, 0);
+const month = `${now.getMonth() + 1}`.padStart(2, 0);
+const year = now.getFullYear();
+const hour = `${now.getHours()}`.padStart(2, 0);
+const min = `${now.getMinutes()}`.padStart(2, 0);
+
+labelDate.textContent = `${day}/${month}/${year}, ${hour}:${min}`;
 
 btnLogin.addEventListener('click', function (e) {
   // Prevent form from submitting
@@ -170,6 +195,16 @@ btnLogin.addEventListener('click', function (e) {
       currentAccount.owner.split(' ')[0]
     }`;
     containerApp.style.opacity = 100;
+
+    // Create current date
+    const now = new Date();
+    const day = `${now.getDate()}`.padStart(2, 0);
+    const month = `${now.getMonth() + 1}`.padStart(2, 0);
+    const year = now.getFullYear();
+    const hour = `${now.getHours()}`.padStart(2, 0);
+    const min = `${now.getMinutes()}`.padStart(2, 0);
+
+    labelDate.textContent = `${day}/${month}/${year}, ${hour}:${min}`;
 
     // Clear input fields
     inputLoginUsername.value = inputLoginPin.value = '';
@@ -198,6 +233,10 @@ btnTransfer.addEventListener('click', function (e) {
     currentAccount.movements.push(-amount);
     receiverAcc.movements.push(amount);
 
+    // Add loan date
+    currentAccount.movementsDates.push(new Date().toISOString());
+    receiverAcc.movementsDates.push(new Date().toISOString());
+
     // Update UI
     updateUI(currentAccount);
   }
@@ -211,6 +250,9 @@ btnLoan.addEventListener('click', function (e) {
   if (amount > 0 && currentAccount.movements.some(mov => mov >= amount * 0.1)) {
     // Add movement
     currentAccount.movements.push(amount);
+
+    // Add loan date
+    currentAccount.movementsDates.push(new Date().toISOString());
 
     // Update UI
     updateUI(currentAccount);
@@ -344,4 +386,61 @@ labelBalance.addEventListener('click', function () {
     if (i % 2 === 0) row.style.backgroundColor = 'orangered';
   });
 });
+*/
+
+/*
+// 04. BigInt - special type of integer (ES2020)
+// For numbers above the integer limit (2 alla 53)
+console.log(2 ** 53 - 1); // Biggest number
+console.log(Number.MAX_SAFE_INTEGER); // It's the same.. for number above there can be errors
+
+// BIGINT can be used to store numbers as large as we want
+// We have to add a "n" at the end of the number to transform it in big integer:
+console.log(1351354849536597443843513944349494n);
+
+// OPERATIONS WITH BIG INTEGERS:
+console.log(10000n + 10000n); // The operators work the same as normal numbers
+// It's not possible to mix bigInt numbers with regular numbers, we have to conver the normal number in bigInt with the method .bigInt
+// exeption: comparison operator and plus operator when working with strings
+
+console.log(20n === 20); // FALSE, because it's not the same type (regular number vs bigInt)
+
+// Division:
+console.log(10n / 3n); // --> 3; it gives the closes integer
+*/
+
+/*
+// 05. CREATING DATES
+// First, we need to create a date. Four ways with the NEWDATE constructor and different parameters:
+const now = new Date();
+console.log(now);
+
+// Parse the date from a date string:
+console.log(new Date('Sun Jan 10 2021 13:17:10')); // it parse the time based on this
+console.log(new Date('December 24, 2010')); // Manually written
+console.log(new Date(account1.movementsDates[0]));
+
+console.log(new Date(2087, 10, 19, 15, 23, 5)); // The month is zero based (10 = November)
+
+console.log(new Date(0)); // 1 Gennaio 1970
+
+// Working with dates
+const future = new Date(2087, 10, 19, 15, 23);
+console.log(future);
+console.log(future.getFullYear()); // It gives back the year
+console.log(future.getMonth()); // Month (zero based)
+console.log(future.getDate()); // Day of the month
+console.log(future.getDay()); // weekday
+console.log(future.getHours());
+console.log(future.getMinutes());
+console.log(future.getSeconds());
+console.log(future.toISOString()); // Gives the ISO String
+console.log(future.getTime()); // Timestamp! Amount of milliseconds passed from 1 Jan 1970
+console.log(new Date(3720090180000)); // We can reverse the timestamp
+
+console.log(Date.now()); // This gives the timestamp of now
+
+// SET Versions of this methods:
+future.setFullYear(2040); // This changes the year
+console.log(future);
 */
